@@ -1,0 +1,111 @@
+volumes:
+  files:
+    driver: local
+  mysql:
+    driver: local
+  redis:
+    driver: local
+  
+
+services:
+  owncloud:
+    image: owncloud/server:${OWNCLOUD_VERSION}
+    container_name: owncloud_server
+    restart: always
+    ports:
+      - ${HTTP_PORT}:8080
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      - OWNCLOUD_DOMAIN=${OWNCLOUD_DOMAIN}
+      - OWNCLOUD_TRUSTED_DOMAINS=${OWNCLOUD_TRUSTED_DOMAINS}
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=owncloud
+      - OWNCLOUD_DB_USERNAME=owncloud
+      - OWNCLOUD_DB_PASSWORD=owncloud
+      - OWNCLOUD_DB_HOST=mariadb
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_MYSQL_UTF8MB4=true
+      - OWNCLOUD_REDIS_ENABLED=true
+      - OWNCLOUD_REDIS_HOST=redis
+    
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - files:/mnt/data
+
+  mariadb:
+    image: mariadb
+    container_name: owncloud_mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=owncloud
+      - MYSQL_USER=owncloud
+      - MYSQL_PASSWORD=owncloud
+      - MYSQL_DATABASE=owncloud
+      - MARIADB_AUTO_UPGRADE=1
+    command: ["--max-allowed-packet=128M", "--innodb-log-file-size=64M"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "--password=owncloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql:/var/lib/mysql
+
+  redis:
+    image: redis
+    container_name: owncloud_redis
+    restart: always
+    command: ["--databases", "1"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis:/data
+  
+
+  openldap:
+    image: osixia/openldap:latest
+    container_name: openldap
+    hostname: openldap
+    ports: 
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ./data/certificates:/container/service/slapd/assets/certs
+      - ./data/slapd/database:/var/lib/ldap
+      - ./data/slapd/config:/etc/ldap/slapd.d
+    environment: 
+      - LDAP_ORGANISATION=oblivion
+      - LDAP_DOMAIN=oblivion.com
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=admin_pass
+      - LDAP_CONFIG_PASSWORD=config_pass
+      - "LDAP_BASE_DN=dc=oblivion,dc=com"
+      - LDAP_TLS_CRT_FILENAME=server.crt
+      - LDAP_TLS_KEY_FILENAME=server.key
+      - LDAP_TLS_CA_CRT_FILENAME=oblivion.com.ca.crt
+      - LDAP_READONLY_USER=true
+      - LDAP_READONLY_USER_USERNAME=user-ro
+      - LDAP_READONLY_USER_PASSWORD=ro_pass
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    hostname: phpldapadmin
+    ports: 
+      - "80:80"
+    environment: 
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    depends_on:
+      - openldap
+  
