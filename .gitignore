@@ -1,2 +1,8 @@
 /.DS_Store
 .mdb
+own-docker-server/data/certificates/dhparam.pem
+own-docker-server/data/certificates/server.crt
+own-docker-server/data/certificates/server.key
+own-docker-server/data/slapd/config/cn=config.ldif
+own-docker-server/data/slapd/database/data.mdb
+own-docker-server/data/slapd/database/lock.mdb
