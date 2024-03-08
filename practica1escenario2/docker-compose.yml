@@ -5,7 +5,6 @@ volumes:
     driver: local
   redis:
     driver: local
-  
 
 services:
 
@@ -40,12 +39,12 @@ services:
       - OWNCLOUD_DB_NAME=owncloud
       - OWNCLOUD_DB_USERNAME=owncloud
       - OWNCLOUD_DB_PASSWORD=owncloud
-      - OWNCLOUD_DB_HOST=mariadb
+      - OWNCLOUD_DB_HOST=owncloud_mariadb
       - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
       - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - OWNCLOUD_MYSQL_UTF8MB4=true
       - OWNCLOUD_REDIS_ENABLED=true
-      - OWNCLOUD_REDIS_HOST=redis
+      - OWNCLOUD_REDIS_HOST=owncloud_redis
     
     healthcheck:
       test: ["CMD", "/usr/bin/healthcheck"]
@@ -114,7 +113,7 @@ services:
       - LDAP_ADMIN_USERNAME=admin
       - LDAP_ADMIN_PASSWORD=admin_pass
       - LDAP_CONFIG_PASSWORD=config_pass
-      - "LDAP_BASE_DN=dc=oblivion,dc=com"
+      - LDAP_BASE_DN=dc=oblivion,dc=com
       - LDAP_TLS_CRT_FILENAME=server.crt
       - LDAP_TLS_KEY_FILENAME=server.key
       - LDAP_TLS_CA_CRT_FILENAME=oblivion.com.ca.crt
@@ -129,7 +128,7 @@ services:
       - mynet
     hostname: phpldapadmin
     ports: 
-      - "777:80"
+      - "7777:80"
     environment: 
       - PHPLDAPADMIN_LDAP_HOSTS=openldap
       - PHPLDAPADMIN_HTTPS=false
