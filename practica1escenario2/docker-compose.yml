@@ -3,6 +3,8 @@ volumes:
     driver: local
   mysql:
     driver: local
+  mysql_slave:
+    driver: local
   redis:
     driver: local
 
@@ -30,7 +32,7 @@ services:
     ports:
       - 8080-8081:8080
     depends_on:
-      - mariadb
+      - mariadb_master
       - redis
     environment:
       - OWNCLOUD_DOMAIN=${OWNCLOUD_DOMAIN}
@@ -39,12 +41,12 @@ services:
       - OWNCLOUD_DB_NAME=owncloud
       - OWNCLOUD_DB_USERNAME=owncloud
       - OWNCLOUD_DB_PASSWORD=owncloud
-      - OWNCLOUD_DB_HOST=owncloud_mariadb
+      - OWNCLOUD_DB_HOST=mariadb_master
       - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
       - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - OWNCLOUD_MYSQL_UTF8MB4=true
       - OWNCLOUD_REDIS_ENABLED=true
-      - OWNCLOUD_REDIS_HOST=owncloud_redis
+      - OWNCLOUD_REDIS_HOST=redis
     
     healthcheck:
       test: ["CMD", "/usr/bin/healthcheck"]
@@ -57,9 +59,9 @@ services:
     deploy:
       replicas: 2
 
-  mariadb:
+  mariadb_master:
     image: mariadb
-    container_name: owncloud_mariadb
+    container_name: mariadb_master
     networks:
       - mynet
     restart: always
@@ -77,10 +79,36 @@ services:
       retries: 5
     volumes:
       - mysql:/var/lib/mysql
+      - ./50-server_master.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+
+
+  mariadb_slave:
+      image: mariadb
+      container_name: mariadb_slave
+      networks:
+        - mynet
+      restart: always
+      environment:
+        - MYSQL_ROOT_PASSWORD=owncloud
+        - MARIADB_AUTO_UPGRADE=1
+        - MARIADB_MASTER_HOST=172.23.0.4
+        - MARIADB_REPLICATION_USER=owncloud
+        - MARIADB_REPLICATION_PASSWORD=owncloud
+      command: ["--max-allowed-packet=128M", "--innodb-log-file-size=64M"]
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-u", "root", "--password=owncloud"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      volumes:
+        - mysql_slave:/var/lib/mysql
+        - ./50-server_slave.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+      depends_on:
+        - mariadb_master
 
   redis:
     image: redis
-    container_name: owncloud_redis
+    container_name: redis
     networks:
       - mynet
     restart: always
@@ -105,7 +133,7 @@ services:
       - "636:636"
     volumes:
       - ./data/certificates:/container/service/slapd/assets/certs
-      - ./data/slapd/database:/var/lib/ldap
+      - ./data/ldapvol/slapd/database:/var/lib/ldap
       - ./data/slapd/config:/etc/ldap/slapd.d
     environment: 
       - LDAP_ORGANISATION=oblivion
