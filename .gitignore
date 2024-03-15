@@ -34,3 +34,5 @@ practica1escenario2/data/slapd/config/docker-openldap-was-admin-password-set
 practica1escenario2/data/slapd/config/docker-openldap-was-started-with-tls
 practica1escenario2/data/slapd/database/data.mdb
 practica1escenario2/data/slapd/database/lock.mdb
+practica1escenario2/data/ldapvol/slapd/database/data.mdb
+practica1escenario2/data/ldapvol/slapd/database/lock.mdb
