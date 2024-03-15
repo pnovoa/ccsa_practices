@@ -65,14 +65,9 @@ bind-address            = 0.0.0.0
 # The following can be used as easy to replay backup logs or for replication.
 # note: if you are setting up a replica, see README.Debian about other
 #       settings you may need to change.
-#server-id              = 1
-#log_bin                = /var/log/mysql/mysql-bin.log
-expire_logs_days        = 10
-server-id              = 2
-log_bin                = /var/log/mysql/mysql-bin.log
-max_binlog_size        = 100M
-relay_log = /var/log/mysql/mysql-relay-bin
-relay_log_index = /var/log/mysql/mysql-relay-bin.index
+
+log-bin
+server_id=2
 
 #
 # * SSL/TLS

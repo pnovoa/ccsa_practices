@@ -32,7 +32,7 @@ services:
     ports:
       - 8080-8081:8080
     depends_on:
-      - mariadb_master
+      - mariadb_slave
       - redis
     environment:
       - OWNCLOUD_DOMAIN=${OWNCLOUD_DOMAIN}
@@ -80,6 +80,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
       - ./50-server_master.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+      - ./sqlmaster:/docker-entrypoint-initdb.d
 
 
   mariadb_slave:
@@ -90,10 +91,6 @@ services:
       restart: always
       environment:
         - MYSQL_ROOT_PASSWORD=owncloud
-        - MARIADB_AUTO_UPGRADE=1
-        - MARIADB_MASTER_HOST=172.23.0.4
-        - MARIADB_REPLICATION_USER=owncloud
-        - MARIADB_REPLICATION_PASSWORD=owncloud
       command: ["--max-allowed-packet=128M", "--innodb-log-file-size=64M"]
       healthcheck:
         test: ["CMD", "mysqladmin", "ping", "-u", "root", "--password=owncloud"]
@@ -103,6 +100,7 @@ services:
       volumes:
         - mysql_slave:/var/lib/mysql
         - ./50-server_slave.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+        - ./sqlslave:/docker-entrypoint-initdb.d
       depends_on:
         - mariadb_master
 
