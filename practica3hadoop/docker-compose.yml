@@ -1,9 +1,3 @@
-volumes:
-  datanode:
-    driver: local
-  namenode:
-    driver: local
-
 services:
    namenode:
       image: apache/hadoop:3
@@ -13,18 +7,16 @@ services:
         - 9870:9870
       env_file:
         - ./config
+      volumes:
+        - ./counter:/home/pavel/src/word_counter
       environment:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
-      volumes:
-        - namenode:/hadoop/dfs/name
 
    datanode:
       image: apache/hadoop:3
       command: ["hdfs", "datanode"]
       env_file:
         - ./config
-      volumes:
-        - datanode:/hadoop/dfs/data
           
    resourcemanager:
       image: apache/hadoop:3
