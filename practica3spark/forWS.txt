@@ -1,0 +1,3 @@
+sed -i 's/\r$//' start-spark.sh
+
+RUN chmod +x /start-spark.sh
