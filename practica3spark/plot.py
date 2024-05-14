@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-file_path = '/home/pavel/VSCODE/ccsa_practices/practica3spark/data/out/merged.txt'
+file_path = 'data/out/merged.txt'
 
 
 word_freq = {}

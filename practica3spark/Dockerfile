@@ -43,8 +43,8 @@ touch $SPARK_WORKER_LOG && \
 ln -sf /dev/stdout $SPARK_MASTER_LOG && \
 ln -sf /dev/stdout $SPARK_WORKER_LOG
 
-# RUN chmod +x /start-spark.sh
-
 COPY start-spark.sh /
+
+RUN chmod +x /start-spark.sh
 
 CMD ["/bin/bash", "/start-spark.sh"]
