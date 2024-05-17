@@ -11,7 +11,6 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 
-# Prepare training and test data.
 data = spark.read.csv("/opt/spark-data/extra_small_celestial.csv", sep=";", header=True, inferSchema=True)
 
 numeric_features = [col for col, dtype in data.dtypes if dtype == "int" or dtype == "double"]
