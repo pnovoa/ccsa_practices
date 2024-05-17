@@ -55,9 +55,14 @@ def predict():
         
         # Seleccionar solo la columna de predicción
         prediction = predictions.select("prediction").collect()[0][0]
+
+        human_answer = "galaxy"
+
+        if prediction == 1.0:
+            human_answer = "star"
         
         # Devolver la predicción como JSON
-        return jsonify({'prediction': prediction})
+        return jsonify({'prediction': human_answer})
     
     except Exception as e:
         return jsonify({'error': str(e)})
