@@ -1,4 +1,4 @@
-./bin/spark-submit /opt/spark-apps/celestial_ms.py --output /opt/spark-data/out --input /opt/spark-data/medium_celestial.csv
+./bin/spark-submit /opt/spark-apps/celestial_ms.py --output /opt/spark-data/out --input /opt/spark-data/extra_small_celestial.csv
 
 
 curl -X POST -H "Content-Type: application/json" -d @data.json http://localhost:5000/predict
